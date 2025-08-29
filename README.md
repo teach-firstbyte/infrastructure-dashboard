@@ -16,21 +16,31 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Tech stack:
+- Next.js, Supabase, React, TypeScript
+- Backend on Prisma + Supabase
+- Hosted on Vercel.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+TODOS:
+Dashboard to view attendance and statistics of the club, active members, and analytics of the website.
+- Ability to log into the system and make an account based on an access code.
+  - SSO with Northeastern account.
+- Ability to delegate read/write access to certain files within firstbyte drive WITHOUT giving full access to firstbyte gmail(like cmon we should not have everyone on the account) https://developers.google.com/workspace/drive/api/guides/ref-roles 
+The ability to send tasks to other users and similar to Linear.
+- Ability to have admin accounts.
+- Login with Google / Magic Link
+- Ability to have multiple teams.
+  - CS Curricula Team
+  - STEM Curricula Team
+- Ability to upload all previous workshops.
+- Ability to Assign homework/tasks.
+- Ability to track attendance.
+- Add feedback form.`
+- Ability to upload files.
+Reach: 
+- Maybe just add linear integration the ability to join a linear workspace from our website and manage tasks, and potentially sync linear tasks to the website easily through the API.
+- The ability to actually manage our landing page using a database schema, uploading new team members, etc. And editing the content within the application rather than writing more code to edit the application.
+- Individual workspaces for each user—that's a student.
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
