@@ -32,12 +32,13 @@ The ability to send tasks to other users and similar to Linear.
 - Login with Google / Magic Link
 - Ability to have multiple teams.
   - CS Curricula Team
-  - STEM Curricula Team
+  - STEM Curricula Team etc.
 - Ability to upload all previous workshops.
 - Ability to Assign homework/tasks.
 - Ability to track attendance.
 - Add feedback form.`
 - Ability to upload files.
+
 Reach: 
 - Maybe just add linear integration the ability to join a linear workspace from our website and manage tasks, and potentially sync linear tasks to the website easily through the API.
 - The ability to actually manage our landing page using a database schema, uploading new team members, etc. And editing the content within the application rather than writing more code to edit the application.
