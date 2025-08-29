@@ -13,7 +13,7 @@ datasource db {
 
 model User {
   //fields
-  id        String   @id @default(cuid())
+  id        Int   @id @default(autoincrement())
   email     String   @unique
   name      String?
   createdAt DateTime @default(now())
@@ -29,7 +29,7 @@ model User {
 
 model Team {
   //fields
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   name        String
   description String?
   isActive    Boolean  @default(true)
@@ -45,9 +45,9 @@ model Team {
 
 model TeamMember {
   //fields
-  id     String @id @default(cuid())
-  userId String
-  teamId String
+  id     Int @id @default(autoincrement())
+  userId Int
+  teamId Int
   role   TeamRole @default(MEMBER)
   joinedAt DateTime @default(now())
 
@@ -61,11 +61,11 @@ model TeamMember {
 
 model Meeting {
   //fields
-  id          String      @id @default(cuid())
+  id          Int      @id @default(autoincrement())
   title       String
   description String?
   type        MeetingType
-  teamId      String?
+  teamId      Int?
   scheduledAt DateTime
   startedAt   DateTime?
   endedAt     DateTime?
@@ -85,9 +85,9 @@ model Meeting {
 
 model Attendance {
   //fields
-  id        String           @id @default(cuid())
-  userId    String
-  meetingId String
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  meetingId Int
   status    AttendanceStatus
   checkedInAt DateTime?
   checkedOutAt DateTime?
@@ -105,9 +105,9 @@ model Attendance {
 
 model Feedback {
   //fields 
-  id        String      @id @default(cuid())
-  meetingId String
-  authorId  String
+  id        Int      @id @default(autoincrement())
+  meetingId Int
+  authorId  Int
   rating    Int?        @db.SmallInt // 1-5 scale
   comment   String?
   category  FeedbackCategory?
@@ -120,4 +120,36 @@ model Feedback {
   author  User    @relation("FeedbackAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   
   @@map("feedback")
+}
+
+
+//ENUMS 
+enum TeamRole {
+  LEAD
+  MEMBER
+}
+
+enum MeetingType {
+  GENERAL_MEETING
+  BOARD_MEETING
+  SOCIAL_EVENT
+  FIRSTBITES 
+  //for CS Cirricula team
+  CHV_WORKSHOP
+
+  ///for club-wide workshops
+  WORKSHOP
+}
+
+enum AttendanceStatus {
+  REGISTERED
+  PRESENT
+  ABSENT
+}
+
+enum FeedbackCategory {
+  CONTENT
+  LOGISTICS
+  ENGAGEMENT
+  OVERALL
 }
