@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  //fields
+  id        Int   @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //relationships
+  teamMemberships TeamMember[]
+  attendanceRecords Attendance[]
+  feedbackGiven   Feedback[] @relation("FeedbackAuthor")
+  
+  @@map("users")
+}
+
+model Team {
+  //fields
+  id          Int   @id @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  //relationships
+  members   TeamMember[]
+  meetings  Meeting[]
+  
+  @@map("teams")
+}
+
+model TeamMember {
+  //fields
+  id     Int @id @default(autoincrement())
+  userId Int
+  teamId Int
+  role   TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  //relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@map("team_members")
+}
+
+model Meeting {
+  //fields
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        MeetingType
+  teamId      Int?
+  scheduledAt DateTime
+  startedAt   DateTime?
+  endedAt     DateTime?
+  location    String?
+  isRequired  Boolean     @default(false)
+  maxCapacity Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  //relationships
+  team        Team?        @relation(fields: [teamId], references: [id])
+  attendance  Attendance[]
+  feedback    Feedback[]
+  
+  @@map("meetings")
+}
+
+model Attendance {
+  //fields
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  meetingId Int
+  status    AttendanceStatus
+  checkedInAt DateTime?
+  checkedOutAt DateTime?
+  notes     String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  //relationships
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, meetingId])
+  @@map("attendance")
+}
+
+model Feedback {
+  //fields 
+  id        Int      @id @default(autoincrement())
+  meetingId Int
+  authorId  Int
+  rating    Int?        @db.SmallInt // 1-5 scale
+  comment   String?
+  category  FeedbackCategory?
+  isAnonymous Boolean   @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  //relationships
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  author  User    @relation("FeedbackAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  
+  @@map("feedback")
+}
+
+
+//ENUMS 
+enum TeamRole {
+  LEAD
+  MEMBER
+}
+
+enum MeetingType {
+  GENERAL_MEETING
+  BOARD_MEETING
+  SOCIAL_EVENT
+  FIRSTBITES 
+  //for CS Cirricula team
+  CHV_WORKSHOP
+
+  ///for club-wide workshops
+  WORKSHOP
+}
+
+enum AttendanceStatus {
+  REGISTERED
+  PRESENT
+  ABSENT
+}
+
+enum FeedbackCategory {
+  CONTENT
+  LOGISTICS
+  ENGAGEMENT
+  OVERALL
+}
