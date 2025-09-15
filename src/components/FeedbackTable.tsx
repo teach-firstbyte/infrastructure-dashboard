@@ -19,10 +19,10 @@ interface Feedback {
   comment: string | null
   category: string | null
   isAnonymous: boolean
-  createdAt: string
+  createdAt: Date
   meeting: {
     title: string
-    scheduledAt: string
+    scheduledAt: Date
   }
   author: {
     name: string | null

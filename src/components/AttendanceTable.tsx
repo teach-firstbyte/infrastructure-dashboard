@@ -16,17 +16,17 @@ interface Attendance {
   userId: number
   meetingId: number
   status: string
-  checkedInAt: string | null
-  checkedOutAt: string | null
+  checkedInAt: Date | null
+  checkedOutAt: Date | null
   notes: string | null
-  createdAt: string
+  createdAt: Date
   user: {
     name: string | null
     email: string
   }
   meeting: {
     title: string
-    scheduledAt: string
+    scheduledAt: Date
   }
 }
 

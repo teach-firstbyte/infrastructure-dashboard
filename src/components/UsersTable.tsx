@@ -15,8 +15,8 @@ interface User {
   id: number
   email: string
   name: string | null
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
   teamMemberships: Array<{
     team: {
       name: string

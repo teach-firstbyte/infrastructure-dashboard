@@ -17,13 +17,13 @@ interface Meeting {
   description: string | null
   type: string
   teamId: number | null
-  scheduledAt: string
-  startedAt: string | null
-  endedAt: string | null
+  scheduledAt: Date
+  startedAt: Date | null
+  endedAt: Date | null
   location: string | null
   isRequired: boolean
   maxCapacity: number | null
-  createdAt: string
+  createdAt: Date
   team?: {
     name: string
   }

@@ -16,8 +16,8 @@ interface Team {
   name: string
   description: string | null
   isActive: boolean
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
   members: Array<{
     user: {
       name: string | null

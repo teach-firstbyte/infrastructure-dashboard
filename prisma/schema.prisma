@@ -16,8 +16,8 @@ model User {
   id        Int   @id @default(autoincrement())
   email     String   @unique
   name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   //relationships
   teamMemberships TeamMember[]
@@ -32,9 +32,9 @@ model Team {
   id          Int   @id @default(autoincrement())
   name        String
   description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   //relationships
   members   TeamMember[]
@@ -46,10 +46,10 @@ model Team {
 model TeamMember {
   //fields
   id     Int @id @default(autoincrement())
-  userId Int
-  teamId Int
+  userId Int @map("user_id")
+  teamId Int @map("team_id")
   role   TeamRole @default(MEMBER)
-  joinedAt DateTime @default(now())
+  joinedAt DateTime @default(now()) @map("joined_at")
 
   //relationships
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -65,15 +65,15 @@ model Meeting {
   title       String
   description String?
   type        MeetingType
-  teamId      Int?
-  scheduledAt DateTime
-  startedAt   DateTime?
-  endedAt     DateTime?
+  teamId      Int? @map("team_id")
+  scheduledAt DateTime @map("scheduled_at")
+  startedAt   DateTime? @map("started_at")
+  endedAt     DateTime? @map("ended_at")
   location    String?
-  isRequired  Boolean     @default(false)
-  maxCapacity Int?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  isRequired  Boolean     @default(false) @map("is_required")
+  maxCapacity Int? @map("max_capacity")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   //relationships
   team        Team?        @relation(fields: [teamId], references: [id])
@@ -86,14 +86,14 @@ model Meeting {
 model Attendance {
   //fields
   id        Int           @id @default(autoincrement())
-  userId    Int
-  meetingId Int
+  userId    Int @map("user_id")
+  meetingId Int @map("meeting_id")
   status    AttendanceStatus
-  checkedInAt DateTime?
-  checkedOutAt DateTime?
+  checkedInAt DateTime? @map("checked_in_at")
+  checkedOutAt DateTime? @map("checked_out_at")
   notes     String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
 
   //relationships
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -106,14 +106,14 @@ model Attendance {
 model Feedback {
   //fields 
   id        Int      @id @default(autoincrement())
-  meetingId Int
-  authorId  Int
+  meetingId Int @map("meeting_id")
+  authorId  Int @map("author_id")
   rating    Int?        @db.SmallInt // 1-5 scale
   comment   String?
   category  FeedbackCategory?
-  isAnonymous Boolean   @default(false)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  isAnonymous Boolean   @default(false) @map("is_anonymous")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
   //relationships
   meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
