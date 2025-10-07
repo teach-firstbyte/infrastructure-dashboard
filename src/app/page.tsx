@@ -4,10 +4,9 @@ import { TeamsTable } from "@/components/TeamsTable";
 import { MeetingsTable } from "@/components/MeetingsTable";
 import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
-import { PrismaClient } from '../generated/prisma'
+import { prisma } from "@/lib/prisma";
 
 export default async function Home() {
-  const prisma = new PrismaClient()
   
   // Fetch all data from Prisma
   const users = await prisma.user.findMany({
