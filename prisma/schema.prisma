@@ -126,6 +126,8 @@ model Feedback {
 enum TeamRole {
   LEAD
   MEMBER
+
+  @@map("team_role")
 }
 
 enum MeetingType {
@@ -138,12 +140,16 @@ enum MeetingType {
 
   ///for club-wide workshops
   WORKSHOP
+
+  @@map("meeting_type")
 }
 
 enum AttendanceStatus {
   REGISTERED
   PRESENT
   ABSENT
+
+  @@map("attendance_status")
 }
 
 enum FeedbackCategory {
@@ -151,4 +157,6 @@ enum FeedbackCategory {
   LOGISTICS
   ENGAGEMENT
   OVERALL
+
+  @@map("feedback_category")
 }
