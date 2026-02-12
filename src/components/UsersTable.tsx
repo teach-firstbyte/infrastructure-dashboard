@@ -8,8 +8,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardButton,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import React, { useState } from "react"
+import {
+  Modal,
+  ModalHeader,
+  ModalForm,
+  ModalButton,
+} from "@/components/ui/modal"
 
 interface User {
   id: number
@@ -30,11 +44,35 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users }: UsersTableProps) {
+  const [showModal, setShowModal] = useState(false);
+  const [newUser, setNewUser] = useState<Pick<User, "name" | "email">>({
+    name: "",
+    email: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("New user (not connected to backend):", newUser);
+
+    // close after submission
+    setShowModal(false);
+    // reset form
+    setNewUser({ name: "", email: "" });
+  };
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Users</CardTitle>
-        <CardDescription>All registered users in the system</CardDescription>
+      <CardHeader className="flex items-center justify-between">
+        <div>
+          <CardTitle>Users</CardTitle>
+          <CardDescription>All registered users in the system</CardDescription>
+        </div>
+        <CardButton onClick={() => setShowModal(true)}>+ Add User</CardButton>
       </CardHeader>
       <CardContent>
         <Table>
@@ -67,6 +105,23 @@ export function UsersTable({ users }: UsersTableProps) {
             ))}
           </TableBody>
         </Table>
+        {showModal && (
+          <Modal onClose={() => setShowModal(false)}>
+            <ModalHeader>Add New User</ModalHeader>
+            <ModalForm
+              newUser={newUser}
+              onChange={handleChange}
+              onSubmit={handleSubmit}
+            >
+              <ModalButton variant="cancel" onClick={() => setShowModal(false)}>
+                Cancel
+              </ModalButton>
+              <ModalButton variant="primary" type="submit">
+                Save
+              </ModalButton>
+            </ModalForm>
+          </Modal>
+        )}
       </CardContent>
     </Card>
   )

@@ -32,9 +32,11 @@ A dashboard for tracking FirstByte club participation, attendance, projects, and
 2. **Copy and update environment variables**
    - Create an `.env.local` file
    - Ask Ameeka or Nick for the Supabase keys
-   - Fill in the required values (Should look like this)
-     ```
+   - Fill in the required values (Will have **two** files)
+     ```.env
      DATABASE_URL="postgresql://postgres.[URL]:[PASSWORD]@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
+     ```
+     ```.env.local
      NEXT_PUBLIC_SUPABASE_URL="https://[URL].supabase.co"
      NEXT_PUBLIC_SUPABASE_ANON_KEY="[ANON_KEY]"
      ```
@@ -50,13 +52,7 @@ A dashboard for tracking FirstByte club participation, attendance, projects, and
 
 **Never run `prisma db push` or `prisma migrate dev` on the shared database unless you are coordinating a schema change!**
 
-1. **Pull the latest schema from Supabase**
-   ```bash
-   npx prisma db pull
-   ```
-   This syncs your local `schema.prisma` with the database structure.
-
-2. **Generate the Prisma Client**
+1. **Generate the Prisma Client**
    ```bash
    npx prisma generate
    ```
@@ -112,7 +108,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 **If you’re stuck:**  
 - Check terminal output for error messages  
 - Verify your environment variables  
-- Contact the development team for help
+- Contact Ameeka and Nick
 
 ---
 
@@ -121,10 +117,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - User authentication & authorization  
 - Google SSO integration  
 - File upload capabilities  
-- Linear integration for task management  
+- Some form of Jira board integration for task management  
 - Admin dashboard for content management  
 - Individual user workspaces
 
 ---
 
-**For any questions or access requests, contact the project admin.**
+**For any questions or access requests, contact the project admins (Ameeka and Nick).**

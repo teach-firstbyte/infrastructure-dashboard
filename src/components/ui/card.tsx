@@ -48,6 +48,19 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+function CardButton({ className, ...props }: React.ComponentProps<"button">) {
+  return (
+    <button
+      data-slot="card-button"
+      className={cn(
+        "bg-[rgb(76,111,78)] text-white px-4 py-2 rounded-md hover:opacity-90 transition",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -86,6 +99,7 @@ export {
   CardHeader,
   CardFooter,
   CardTitle,
+  CardButton,
   CardAction,
   CardDescription,
   CardContent,
