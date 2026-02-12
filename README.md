@@ -52,13 +52,7 @@ A dashboard for tracking FirstByte club participation, attendance, projects, and
 
 **Never run `prisma db push` or `prisma migrate dev` on the shared database unless you are coordinating a schema change!**
 
-1. **Pull the latest schema from Supabase**
-   ```bash
-   npx prisma db pull
-   ```
-   This syncs your local `schema.prisma` with the database structure.
-
-2. **Generate the Prisma Client**
+1. **Generate the Prisma Client**
    ```bash
    npx prisma generate
    ```
