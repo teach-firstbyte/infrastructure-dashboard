@@ -14,7 +14,7 @@ import { Feedback } from "@/components/FeedbackTable";
 /**
  * Fetches data from the API
  * @param endpoint - The endpoint to fetch data from
- * @returns the data
+ * @returns the data requested from the API
  */
 async function fetchData<T>(endpoint: string): Promise<T> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/${endpoint}`, {
