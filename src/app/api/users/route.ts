@@ -2,6 +2,27 @@ import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
+ * GET /api/users - Get all users
+ * GET /api/users/[id] - Get specific user (handled by [id]/route.ts)
+ */
+export async function GET(): Promise<NextResponse> {
+  try {
+    const users = await prisma.user.findMany({
+      include: { 
+        teamMemberships: {
+          include: {
+            team: true
+          }
+        }
+      }
+    });
+    return NextResponse.json(users, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to get users' }, { status: 500 });
+  }
+}
+
+/**
  * Creates a new user
  * @param request - The request object
  * @returns The response object

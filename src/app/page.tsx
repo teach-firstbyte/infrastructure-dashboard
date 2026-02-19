@@ -5,50 +5,39 @@ import { MeetingsTable } from "@/components/MeetingsTable";
 import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
 import { prisma } from "@/lib/prisma";
+import { User } from "@/components/UsersTable";
+import { Team } from "@/components/TeamsTable";
+import { Meeting } from "@/components/MeetingsTable";
+import { Attendance } from "@/components/AttendanceTable";
+import { Feedback } from "@/components/FeedbackTable";
+
+/**
+ * Fetches data from the API
+ * @param endpoint - The endpoint to fetch data from
+ * @returns the data requested from the API
+ */
+async function fetchData<T>(endpoint: string): Promise<T> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/${endpoint}`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch data');
+  }
+
+  return response.json();
+}
 
 export default async function Home() {
   
   // Fetch all data from Prisma
-  const users = await prisma.user.findMany({
-    include: {
-      teamMemberships: {
-        include: {
-          team: true
-        }
-      }
-    }
-  })
-  const teams = await prisma.team.findMany({
-    include: {
-      members: {
-        include: {
-          user: true
-        }
-      }
-    }
-  })
-  const meetings = await prisma.meeting.findMany({
-    include: {
-      attendance: {
-        include: {
-          user: true
-        }
-      },
-      feedback: true
-    }
-  })
-  const attendance = await prisma.attendance.findMany({
-    include: {
-      user: true,
-      meeting: true
-    }
-  })
-  const feedback = await prisma.feedback.findMany({
-    include: {
-      meeting: true,
-      author: true
-    }
-  })
+  const [ users, teams, meetings, attendance, feedback ] = await Promise.all([
+    fetchData<User[]>('users'),
+    fetchData<Team[]>('teams'),
+    fetchData<Meeting[]>('meetings'),
+    fetchData<Attendance[]>('attendance'),
+    fetchData<Feedback[]>('feedback'),
+  ]);
 
   return (
     <div className="container mx-auto p-6 space-y-8">
