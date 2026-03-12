@@ -23,6 +23,8 @@ import {
   ModalHeader,
   ModalForm,
   ModalButton,
+  ModalDropdown,
+  ModalCheckboxes,
 } from "@/components/ui/modal"
 
 interface User {
@@ -44,11 +46,79 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users }: UsersTableProps) {
-  const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newUser, setNewUser] = useState<Pick<User, "name" | "email">>({
     name: "",
     email: "",
   });
+  const [showAssignModal, setShowAssignModal] = useState(false);
+
+  // hardcoded foor now
+  const teams = [
+    { id: 1, name: "Brand and Marketing (LEAD)" },
+    { id: 2, name: "Software Events (LEAD)" },
+    { id: 3, name: "CS Curricula (LEAD)" },
+    { id: 4, name: "STEM Curricula (LEAD)" },
+    { id: 5, name: "Software Website (LEAD)" }
+  ];
+
+  // local db based on pre-existing team assignments
+  const [userTeams, setUserTeams] = useState<Record<number, number[]>>({
+    3: [1], // example: user with id 3 already in team with id 1
+    4: [2],
+    5: [2],
+    6: [5],
+    7: [3],
+    8: [3],
+    9: [4],
+    10: [4],
+    11: [5],
+  });
+
+  // for the assign modal
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
+
+  // for the checkboxes
+  const toggleTeam = (teamId: string | number) => {
+    const id = typeof teamId === "string" ? Number(teamId) : teamId;
+    setSelectedTeams((prev) =>
+      prev.includes(id)
+        ? prev.filter((tid) => tid !== id)
+        : [...prev, id]
+    );
+  }
+
+  const handleAssignSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedUserId) return;
+
+    // Update DB
+    setUserTeams((prev) => ({
+      ...prev,
+      [selectedUserId]: selectedTeams,
+    }));
+
+    console.log("Updated team assignments:", {
+      userId: selectedUserId,
+      teams: selectedTeams,
+    });
+
+    // close modal
+    setShowAssignModal(false);
+  };
+
+
+  const handleUserSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const userId = Number(e.target.value);
+    setSelectedUserId(userId);
+
+    // existing team assignments
+    const teamsForUser = userTeams[userId] ?? [];
+    setSelectedTeams(teamsForUser);
+  };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,19 +130,22 @@ export function UsersTable({ users }: UsersTableProps) {
     console.log("New user (not connected to backend):", newUser);
 
     // close after submission
-    setShowModal(false);
+    setShowAddModal(false);
     // reset form
     setNewUser({ name: "", email: "" });
   };
 
   return (
     <Card>
-      <CardHeader className="flex items-center justify-between">
+      <CardHeader>
         <div>
           <CardTitle>Users</CardTitle>
           <CardDescription>All registered users in the system</CardDescription>
         </div>
-        <CardButton onClick={() => setShowModal(true)}>+ Add User</CardButton>
+        <div data-slot="card-action" className="flex gap-2">
+          <CardButton onClick={() => setShowAssignModal(true)}>Assign Teams</CardButton>
+          <CardButton onClick={() => setShowAddModal(true)}>+ Add User</CardButton>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -105,21 +178,51 @@ export function UsersTable({ users }: UsersTableProps) {
             ))}
           </TableBody>
         </Table>
-        {showModal && (
-          <Modal onClose={() => setShowModal(false)}>
+        {showAddModal && (
+          <Modal onClose={() => setShowAddModal(false)}>
             <ModalHeader>Add New User</ModalHeader>
             <ModalForm
               newUser={newUser}
               onChange={handleChange}
               onSubmit={handleSubmit}
             >
-              <ModalButton variant="cancel" onClick={() => setShowModal(false)}>
+              <ModalButton variant="cancel" onClick={() => setShowAddModal(false)}>
                 Cancel
               </ModalButton>
               <ModalButton variant="primary" type="submit">
                 Save
               </ModalButton>
             </ModalForm>
+          </Modal>
+        )}
+        {showAssignModal && (
+          <Modal onClose={() => setShowAssignModal(false)}>
+            <ModalHeader>Assign User to Teams</ModalHeader>
+            <form onSubmit={handleAssignSubmit} className="space-y-4 p-4">
+              <ModalDropdown
+                label="Select User"
+                value={selectedUserId ?? ""}
+                onChange={handleUserSelect}
+                required
+                options={users.map((u) => ({ value: u.id, label: u.name || `User ${u.id}` }))}
+              />
+              <ModalCheckboxes
+                label="Assign to Teams"
+                options={teams.map((t) => ({ value: t.id, label: t.name }))}
+                selected={selectedTeams}
+                onToggle={toggleTeam}
+                disabled={!selectedUserId}
+              />
+              <div className="flex justify-end gap-2 mt-4">
+                <ModalButton variant="cancel" onClick={() => setShowAssignModal(false)}>
+                  Cancel
+                </ModalButton>
+                <ModalButton variant="primary" type="submit">
+                  Save
+                </ModalButton>
+              </div>
+
+            </form>
           </Modal>
         )}
       </CardContent>
