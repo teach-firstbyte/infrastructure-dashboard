@@ -5,6 +5,28 @@ import { MeetingsTable } from "@/components/MeetingsTable";
 import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
 import { prisma } from "@/lib/prisma";
+import { User } from "@/components/UsersTable";
+import { Team } from "@/components/TeamsTable";
+import { Meeting } from "@/components/MeetingsTable";
+import { Attendance } from "@/components/AttendanceTable";
+import { Feedback } from "@/components/FeedbackTable";
+
+/**
+ * Fetches data from the API
+ * @param endpoint - The endpoint to fetch data from
+ * @returns the data requested from the API
+ */
+async function fetchData<T>(endpoint: string): Promise<T> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/${endpoint}`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch data');
+  }
+
+  return response.json();
+}
 
 async function getUsers() {
   return prisma.user.findMany({
