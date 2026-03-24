@@ -10,31 +10,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-interface Meeting {
-  id: number
-  title: string
-  description: string | null
-  type: string
-  teamId: number | null
-  scheduledAt: Date
-  startedAt: Date | null
-  endedAt: Date | null
-  location: string | null
-  isRequired: boolean
-  maxCapacity: number | null
-  createdAt: Date
-  team?: {
-    name: string
-  }
-  attendance: Array<{
-    user: {
-      name: string | null
-      email: string
-    }
-    status: string
-  }>
-}
+import { Meeting } from "@/types/dashboard";
 
 interface MeetingsTableProps {
   meetings: Meeting[]

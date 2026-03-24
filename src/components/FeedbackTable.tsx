@@ -10,25 +10,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-interface Feedback {
-  id: number
-  meetingId: number
-  authorId: number
-  rating: number | null
-  comment: string | null
-  category: string | null
-  isAnonymous: boolean
-  createdAt: Date
-  meeting: {
-    title: string
-    scheduledAt: Date
-  }
-  author: {
-    name: string | null
-    email: string
-  }
-}
+import { Feedback } from "@/types/dashboard";
 
 interface FeedbackTableProps {
   feedback: Feedback[]

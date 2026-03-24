@@ -24,20 +24,7 @@ import {
   ModalForm,
   ModalButton,
 } from "@/components/ui/modal"
-
-interface User {
-  id: number
-  email: string
-  name: string | null
-  createdAt: Date
-  updatedAt: Date
-  teamMemberships: Array<{
-    team: {
-      name: string
-    }
-    role: string
-  }>
-}
+import { User } from "@/types/dashboard";
 
 interface UsersTableProps {
   users: User[]
