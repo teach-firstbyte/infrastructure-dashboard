@@ -5,91 +5,15 @@ import { MeetingsTable } from "@/components/MeetingsTable";
 import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
 import { prisma } from "@/lib/prisma";
-import { User } from "@/components/UsersTable";
-import { Team } from "@/components/TeamsTable";
-import { Meeting } from "@/components/MeetingsTable";
-import { Attendance } from "@/components/AttendanceTable";
-import { Feedback } from "@/components/FeedbackTable";
-
-/**
- * Fetches data from the API
- * @param endpoint - The endpoint to fetch data from
- * @returns the data requested from the API
- */
-async function fetchData<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/${endpoint}`, {
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch data');
-  }
-
-  return response.json();
-}
-
-async function getUsers() {
-  return prisma.user.findMany({
-    include: {
-      teamMemberships: {
-        include: {
-          team: true,
-        },
-      },
-    },
-  });
-}
-
-async function getTeams() {
-  return prisma.team.findMany({
-    include: {
-      members: {
-        include: {
-          user: true,
-        },
-      },
-    },
-  });
-}
-
-async function getMeetings() {
-  return prisma.meeting.findMany({
-    include: {
-      attendance: {
-        include: {
-          user: true,
-        },
-      },
-      feedback: true,
-    },
-  });
-}
-
-async function getAttendance() {
-  return prisma.attendance.findMany({
-    include: {
-      user: true,
-      meeting: true,
-    },
-  });
-}
-
-async function getFeedback() {
-  return prisma.feedback.findMany({
-    include: {
-      meeting: true,
-      author: true,
-    },
-  });
-}
+import type { Attendance, Feedback, Meeting, Team, User } from "@/types/dashboard";
 
 export default async function Home() {
   const emptyData = {
-    users: [] as Awaited<ReturnType<typeof getUsers>>,
-    teams: [] as Awaited<ReturnType<typeof getTeams>>,
-    meetings: [] as Awaited<ReturnType<typeof getMeetings>>,
-    attendance: [] as Awaited<ReturnType<typeof getAttendance>>,
-    feedback: [] as Awaited<ReturnType<typeof getFeedback>>,
+    users: [] as User[],
+    teams: [] as Team[],
+    meetings: [] as Meeting[],
+    attendance: [] as Attendance[],
+    feedback: [] as Feedback[],
   };
 
   let data = emptyData;
@@ -98,11 +22,46 @@ export default async function Home() {
   try {
     // Fetch all data from Prisma. If this fails, render the dashboard with empty state data.
     const [users, teams, meetings, attendance, feedback] = await Promise.all([
-      getUsers(),
-      getTeams(),
-      getMeetings(),
-      getAttendance(),
-      getFeedback(),
+      prisma.user.findMany({
+        include: {
+          teamMemberships: {
+            include: {
+              team: true,
+            },
+          },
+        },
+      }),
+      prisma.team.findMany({
+        include: {
+          members: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      }),
+      prisma.meeting.findMany({
+        include: {
+          attendance: {
+            include: {
+              user: true,
+            },
+          },
+          feedback: true,
+        },
+      }),
+      prisma.attendance.findMany({
+        include: {
+          user: true,
+          meeting: true,
+        },
+      }),
+      prisma.feedback.findMany({
+        include: {
+          meeting: true,
+          author: true,
+        },
+      }),
     ]);
 
     data = { users, teams, meetings, attendance, feedback };
