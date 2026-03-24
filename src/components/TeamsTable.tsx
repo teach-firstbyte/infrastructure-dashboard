@@ -10,22 +10,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-interface Team {
-  id: number
-  name: string
-  description: string | null
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
-  members: Array<{
-    user: {
-      name: string | null
-      email: string
-    }
-    role: string
-  }>
-}
+import { Team } from "@/types/dashboard";
 
 interface TeamsTableProps {
   teams: Team[]

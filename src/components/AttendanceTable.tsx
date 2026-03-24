@@ -10,25 +10,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-interface Attendance {
-  id: number
-  userId: number
-  meetingId: number
-  status: string
-  checkedInAt: Date | null
-  checkedOutAt: Date | null
-  notes: string | null
-  createdAt: Date
-  user: {
-    name: string | null
-    email: string
-  }
-  meeting: {
-    title: string
-    scheduledAt: Date
-  }
-}
+import { Attendance } from "@/types/dashboard";
 
 interface AttendanceTableProps {
   attendance: Attendance[]
