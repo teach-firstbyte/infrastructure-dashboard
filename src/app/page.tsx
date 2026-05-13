@@ -5,39 +5,70 @@ import { MeetingsTable } from "@/components/MeetingsTable";
 import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
 import { prisma } from "@/lib/prisma";
-import { User } from "@/components/UsersTable";
-import { Team } from "@/components/TeamsTable";
-import { Meeting } from "@/components/MeetingsTable";
-import { Attendance } from "@/components/AttendanceTable";
-import { Feedback } from "@/components/FeedbackTable";
-
-/**
- * Fetches data from the API
- * @param endpoint - The endpoint to fetch data from
- * @returns the data requested from the API
- */
-async function fetchData<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/${endpoint}`, {
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch data');
-  }
-
-  return response.json();
-}
+import type { Attendance, Feedback, Meeting, Team, User } from "@/types/dashboard";
 
 export default async function Home() {
-  
-  // Fetch all data from Prisma
-  const [ users, teams, meetings, attendance, feedback ] = await Promise.all([
-    fetchData<User[]>('users'),
-    fetchData<Team[]>('teams'),
-    fetchData<Meeting[]>('meetings'),
-    fetchData<Attendance[]>('attendance'),
-    fetchData<Feedback[]>('feedback'),
-  ]);
+  const emptyData = {
+    users: [] as User[],
+    teams: [] as Team[],
+    meetings: [] as Meeting[],
+    attendance: [] as Attendance[],
+    feedback: [] as Feedback[],
+  };
+
+  let data = emptyData;
+  let dbUnavailable = false;
+
+  try {
+    // Fetch all data from Prisma. If this fails, render the dashboard with empty state data.
+    const [users, teams, meetings, attendance, feedback] = await Promise.all([
+      prisma.user.findMany({
+        include: {
+          teamMemberships: {
+            include: {
+              team: true,
+            },
+          },
+        },
+      }),
+      prisma.team.findMany({
+        include: {
+          members: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      }),
+      prisma.meeting.findMany({
+        include: {
+          attendance: {
+            include: {
+              user: true,
+            },
+          },
+          feedback: true,
+        },
+      }),
+      prisma.attendance.findMany({
+        include: {
+          user: true,
+          meeting: true,
+        },
+      }),
+      prisma.feedback.findMany({
+        include: {
+          meeting: true,
+          author: true,
+        },
+      }),
+    ]);
+
+    data = { users, teams, meetings, attendance, feedback };
+  } catch (error) {
+    dbUnavailable = true;
+    console.error("Database unavailable, rendering empty dashboard state:", error);
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -46,13 +77,18 @@ export default async function Home() {
         <h1 className="text-3xl font-bold">FirstByte Dashboard</h1>
         <p className="text-muted-foreground">Participation and engagement tracking</p>
       </div>
+      {dbUnavailable && (
+        <div className="rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
+          Could not load database data right now. Showing an empty dashboard until the connection is restored.
+        </div>
+      )}
 
       <div className="grid gap-6">
-        <UsersTable users={users} />
-        <TeamsTable teams={teams} />
-        <MeetingsTable meetings={meetings} />
-        <AttendanceTable attendance={attendance} />
-        <FeedbackTable feedback={feedback} />
+        <UsersTable users={data.users} />
+        <TeamsTable teams={data.teams} />
+        <MeetingsTable meetings={data.meetings} />
+        <AttendanceTable attendance={data.attendance} />
+        <FeedbackTable feedback={data.feedback} />
       </div>
     </div>
   );
