@@ -3,6 +3,24 @@ import { NextResponse } from 'next/server';
 import { TeamRole } from '@prisma/client';
 
 /**
+ * Gets all team members, including their user and team.
+ * @returns The list of team members
+ */
+export async function GET(): Promise<NextResponse> {
+  try {
+    const teamMembers = await prisma.teamMember.findMany({
+      include: {
+        user: true,
+        team: true,
+      },
+    });
+    return NextResponse.json(teamMembers, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to get team members' }, { status: 500 });
+  }
+}
+
+/**
  * Creates a new team member
  * @param request - The request object
  * @returns The response object
