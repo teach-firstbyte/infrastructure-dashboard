@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { MeetingType } from "@prisma/client";
 
 /**
  * Gets all meetings
@@ -20,5 +21,93 @@ export async function GET(): Promise<NextResponse> {
     return NextResponse.json(meetings, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to get meetings' }, { status: 500 });
+  }
+}
+
+/**
+ * Creates a new meeting
+ * @param request - The request object
+ * @returns The created meeting
+ */
+export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    // Validate the request body
+    const {
+      title,
+      description,
+      type,
+      teamId,
+      scheduledAt,
+      location,
+      isRequired,
+      maxCapacity,
+    } = await request.json();
+
+    // title, type, and scheduledAt are the required fields on the model
+    if (!title || !type || !scheduledAt) {
+      return NextResponse.json(
+        { error: 'title, type, and scheduledAt are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate type using the Prisma enum
+    const validTypes = Object.values(MeetingType);
+    if (!validTypes.includes(type as MeetingType)) {
+      return NextResponse.json(
+        { error: `Invalid type. Must be one of: ${validTypes.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // scheduledAt must be a valid date
+    const parsedScheduledAt = new Date(scheduledAt);
+    if (isNaN(parsedScheduledAt.getTime())) {
+      return NextResponse.json(
+        { error: 'scheduledAt must be a valid date' },
+        { status: 400 }
+      );
+    }
+
+    // teamId and maxCapacity are optional, but must be valid integers if provided
+    let parsedTeamId: number | undefined;
+    if (teamId !== undefined && teamId !== null) {
+      parsedTeamId = parseInt(teamId);
+      if (isNaN(parsedTeamId)) {
+        return NextResponse.json(
+          { error: 'teamId must be a valid integer' },
+          { status: 400 }
+        );
+      }
+    }
+
+    let parsedMaxCapacity: number | undefined;
+    if (maxCapacity !== undefined && maxCapacity !== null) {
+      parsedMaxCapacity = parseInt(maxCapacity);
+      if (isNaN(parsedMaxCapacity)) {
+        return NextResponse.json(
+          { error: 'maxCapacity must be a valid integer' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create the meeting
+    const meeting = await prisma.meeting.create({
+      data: {
+        title,
+        description: description ?? null,
+        type: type as MeetingType,
+        teamId: parsedTeamId ?? null,
+        scheduledAt: parsedScheduledAt,
+        location: location ?? null,
+        isRequired: isRequired ?? false,
+        maxCapacity: parsedMaxCapacity ?? null,
+      },
+    });
+
+    return NextResponse.json(meeting, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create meeting' }, { status: 500 });
   }
 }
