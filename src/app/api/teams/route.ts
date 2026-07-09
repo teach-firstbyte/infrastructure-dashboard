@@ -45,6 +45,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(team, { status: 201 });
   } catch (error) {
+
     return NextResponse.json({ error: 'Failed to create team' }, { status: 500 });
   }
 }

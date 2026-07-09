@@ -104,6 +104,7 @@ export async function DELETE(
             { status: 200 }
         );
     } catch (error) {
+        
         return NextResponse.json({ error: "Failed to delete team" }, { status: 500 });
     }
 }

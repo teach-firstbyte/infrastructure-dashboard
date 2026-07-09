@@ -39,6 +39,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Email and name are required' }, { status: 400 });
     }
 
+    // Check if the user already exists
+    if (await prisma.user.findUnique({ where: { email: email } })) {
+      return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+    }
+
     // Create the user
     const user = await prisma.user.create({
       data: { email: email, name: name },
@@ -49,34 +54,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     // Return an error response if failed to create user!
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request: NextRequest): Promise<NextResponse> {
-  try {
-
-    // Parses ID from the request body
-    const { id } = await request.json();
-
-    // if no ID provided, return error
-    if (!id) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-    }
-
-    // Deletes user from database
-    const user = await prisma.user.delete({
-      where: { id }
-    });
-
-    // if user not found, return error
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    } else {
-      return NextResponse.json({ message: 'User deleted successfully' }, { status: 200 });
-    }
-    
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
