@@ -7,10 +7,11 @@ import { TeamRole } from "@prisma/client";
  */
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const teamMemberId = parseInt(params.id);
+        const { id } = await params;
+        const teamMemberId = parseInt(id);
 
         if (isNaN(teamMemberId)) {
             return NextResponse.json(
@@ -45,10 +46,11 @@ export async function GET(
  */
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const teamMemberId = parseInt(params.id);
+        const { id } = await params;
+        const teamMemberId = parseInt(id);
 
         if (isNaN(teamMemberId)) {
             return NextResponse.json(
@@ -63,7 +65,6 @@ export async function PATCH(
             return NextResponse.json({ error: "role is required" }, { status: 400 });
         }
 
-        // Validate role using the Prisma enum
         const validRoles = Object.values(TeamRole);
         if (!validRoles.includes(role as TeamRole)) {
             return NextResponse.json(
@@ -89,6 +90,7 @@ export async function PATCH(
 
         return NextResponse.json(updated, { status: 200 });
     } catch (error) {
+        console.error("PATCH team-member error:", error);
         return NextResponse.json(
             { error: "Failed to update team member" },
             { status: 500 }
@@ -98,13 +100,12 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        // get team-member ID
-        const teamMemberId = parseInt(params.id);
+        const { id } = await params;
+        const teamMemberId = parseInt(id);
 
-        // check that the ID is a number
         if (isNaN(teamMemberId)) {
             return NextResponse.json(
                 { error: "Invalid team member ID" },
@@ -112,7 +113,6 @@ export async function DELETE(
             );
         }
 
-        // check if this team member exists in the database
         const existingTeamMember = await prisma.teamMember.findUnique({
             where: { id: teamMemberId },
         });
@@ -124,13 +124,11 @@ export async function DELETE(
             );
         }
 
-        // delete the team member
         await prisma.teamMember.delete({
             where: { id: teamMemberId },
         });
 
-        return NextResponse.json(
-        {
+        return NextResponse.json({
             message: 'Team member deleted successfully',
             teamMember: existingTeamMember
         }, {
@@ -138,12 +136,8 @@ export async function DELETE(
         });
     } catch (error) {
         return NextResponse.json(
-            {
-                error: 'Failed to delete team member'
-            },
-            {
-                status: 500
-            }
+            { error: 'Failed to delete team member' },
+            { status: 500 }
         );
     }
 }
