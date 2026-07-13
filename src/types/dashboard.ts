@@ -5,7 +5,9 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   teamMemberships: Array<{
+    id: number;
     team: {
+      id: number;
       name: string;
     };
     role: string;
