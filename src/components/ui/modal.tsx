@@ -20,7 +20,7 @@ function Modal({
   return (
     <div
       data-slot="modal-overlay"
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50"
+      className="fixed inset-0 flex items-center justify-center bg-white/10 backdrop-blur-sm z-50"
       onClick={onClose}
     >
       <div

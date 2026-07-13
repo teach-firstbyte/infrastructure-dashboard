@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Modal,
   ModalHeader,
@@ -27,6 +27,7 @@ import {
   ModalCheckboxes,
 } from "@/components/ui/modal"
 import { User } from "@/types/dashboard";
+import { useRouter } from "next/navigation"
 
 interface UsersTableProps {
   users: User[]
@@ -39,32 +40,28 @@ export function UsersTable({ users }: UsersTableProps) {
     email: "",
   });
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const router = useRouter();
 
-  // hardcoded foor now
-  const teams = [
-    { id: 1, name: "Brand and Marketing (LEAD)" },
-    { id: 2, name: "Software Events (LEAD)" },
-    { id: 3, name: "CS Curricula (LEAD)" },
-    { id: 4, name: "STEM Curricula (LEAD)" },
-    { id: 5, name: "Software Website (LEAD)" }
-  ];
+  const [teams, setTeams] = useState<{ id: number; name: string }[]>([]);
+  const [teamsLoading, setTeamsLoading] = useState(false);
 
-  // local db based on pre-existing team assignments
-  const [userTeams, setUserTeams] = useState<Record<number, number[]>>({
-    3: [1], // example: user with id 3 already in team with id 1
-    4: [2],
-    5: [2],
-    6: [5],
-    7: [3],
-    8: [3],
-    9: [4],
-    10: [4],
-    11: [5],
-  });
+  useEffect(() => {
+    if(!showAssignModal) return;
+
+    setTeamsLoading(true);
+    fetch("/api/teams")
+      .then((res) => res.json())
+      .then((data) => setTeams(data))
+      .catch(() => setTeams([]))
+      .finally(() => setTeamsLoading(false));
+  }, [showAssignModal]);
 
   // for the assign modal
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
+
+  const [originalTeamIds, setOriginalTeamIds] = useState<number[]>([]);
+  const [membershipIdByTeam, setMembershipIdByTeam] = useState<Record<number, number>>({});
 
   // for the checkboxes
   const toggleTeam = (teamId: string | number) => {
@@ -76,21 +73,28 @@ export function UsersTable({ users }: UsersTableProps) {
     );
   }
 
-  const handleAssignSubmit = (e: React.FormEvent) => {
+  const handleAssignSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!selectedUserId) return;
 
-    // Update DB
-    setUserTeams((prev) => ({
-      ...prev,
-      [selectedUserId]: selectedTeams,
-    }));
+    const added = selectedTeams.filter((id) => !originalTeamIds.includes(id));
+    const removed = originalTeamIds.filter((id) => !selectedTeams.includes(id));
 
-    console.log("Updated team assignments:", {
-      userId: selectedUserId,
-      teams: selectedTeams,
-    });
+    const addCalls = added.map((teamId) =>
+      fetch("/api/team-members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedUserId, teamId, role: "MEMBER" }),
+      })
+    )
+
+    const removeCalls = removed.map((teamId) =>
+      fetch(`/api/team-members/${membershipIdByTeam[teamId]}`, { method: "DELETE" })
+    )
+
+    await Promise.allSettled([...addCalls, ...removeCalls]);
+
+    router.refresh();
 
     // close modal
     setShowAssignModal(false);
@@ -101,9 +105,16 @@ export function UsersTable({ users }: UsersTableProps) {
     const userId = Number(e.target.value);
     setSelectedUserId(userId);
 
-    // existing team assignments
-    const teamsForUser = userTeams[userId] ?? [];
-    setSelectedTeams(teamsForUser);
+    const user = users.find((u) => u.id === userId);
+    const memberships = user?.teamMemberships ?? [];
+
+    const teamIds = memberships.map((m) => m.team.id);
+    const idMap = Object.fromEntries(memberships.map((m) => [m.team.id, m.id]));
+
+    setSelectedTeams(teamIds);
+    setOriginalTeamIds(teamIds);
+    setMembershipIdByTeam(idMap);
+
   };
 
 
@@ -194,11 +205,11 @@ export function UsersTable({ users }: UsersTableProps) {
                 options={users.map((u) => ({ value: u.id, label: u.name || `User ${u.id}` }))}
               />
               <ModalCheckboxes
-                label="Assign to Teams"
+                label={teamsLoading ? "Loading teams…" : "Assign to Teams"}
                 options={teams.map((t) => ({ value: t.id, label: t.name }))}
                 selected={selectedTeams}
                 onToggle={toggleTeam}
-                disabled={!selectedUserId}
+                disabled={!selectedUserId || teamsLoading}
               />
               <div className="flex justify-end gap-2 mt-4">
                 <ModalButton variant="cancel" onClick={() => setShowAssignModal(false)}>
