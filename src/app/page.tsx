@@ -87,7 +87,7 @@ export default async function Home() {
         <p className="text-muted-foreground">Participation and engagement tracking</p>
       </div>
       <form>
-        <button formAction={logOut} className="text-sm text-muted-foreground underline">
+        <button formAction={logOut} className="text-sm px-3 py-1.5 rounded-md bg-[rgb(76,111,78)] text-white hover:opacity-90 transition">
           Log out
         </button>
       </form>
