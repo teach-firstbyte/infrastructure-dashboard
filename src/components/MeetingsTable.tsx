@@ -26,6 +26,7 @@ import {
   ModalDropdown,
 } from "@/components/ui/modal"
 import { Meeting } from "@/types/dashboard";
+import { TableEmptyState } from "./ui/TableEmptyState"
 
 interface MeetingsTableProps {
   meetings: Meeting[]
@@ -156,7 +157,10 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {meetings.map((meeting) => (
+            {meetings.length === 0 ? (
+              <TableEmptyState colSpan={7} message="No meetings scheduled yet." />
+            ) : (
+            meetings.map((meeting) => (
               <TableRow key={meeting.id}>
                 <TableCell className="font-medium">{meeting.id}</TableCell>
                 <TableCell>{meeting.title}</TableCell>
@@ -172,7 +176,7 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            )))}
           </TableBody>
         </Table>
         {showAddModal && (
