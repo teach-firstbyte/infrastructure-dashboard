@@ -6,8 +6,17 @@ import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
 import { prisma } from "@/lib/prisma";
 import type { Attendance, Feedback, Meeting, Team, User } from "@/types/dashboard";
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
+import { logOut } from "./login/actions"
 
 export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/login');
+  }
+
   const emptyData = {
     users: [] as User[],
     teams: [] as Team[],
@@ -77,6 +86,11 @@ export default async function Home() {
         <h1 className="text-3xl font-bold">FirstByte Dashboard</h1>
         <p className="text-muted-foreground">Participation and engagement tracking</p>
       </div>
+      <form>
+        <button formAction={logOut} className="text-sm text-muted-foreground underline">
+          Log out
+        </button>
+      </form>
       {dbUnavailable && (
         <div className="rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
           Could not load database data right now. Showing an empty dashboard until the connection is restored.
