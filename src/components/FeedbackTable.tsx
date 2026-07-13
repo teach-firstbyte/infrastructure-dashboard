@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Feedback } from "@/types/dashboard";
+import { TableEmptyState } from "./ui/TableEmptyState";
 
 interface FeedbackTableProps {
   feedback: Feedback[]
@@ -47,7 +48,10 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {feedback.map((item) => (
+            {feedback.length === 0 ? (
+              <TableEmptyState colSpan={7} message="No feedback yet."/>
+            ) : (
+            feedback.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
                   {item.isAnonymous ? (
@@ -83,7 +87,7 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
                 </TableCell>
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
               </TableRow>
-            ))}
+            )))}
           </TableBody>
         </Table>
       </CardContent>

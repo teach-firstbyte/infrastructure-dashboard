@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Team } from "@/types/dashboard";
+import { TableEmptyState } from "./ui/TableEmptyState";
 
 interface TeamsTableProps {
   teams: Team[]
@@ -36,7 +37,10 @@ export function TeamsTable({ teams }: TeamsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {teams.map((team) => (
+            {teams.length === 0 ? (
+              <TableEmptyState colSpan={6} message="No teams established yet." />
+            ) : (
+            teams.map((team) => (
               <TableRow key={team.id}>
                 <TableCell className="font-medium">{team.id}</TableCell>
                 <TableCell>{team.name}</TableCell>
@@ -57,7 +61,7 @@ export function TeamsTable({ teams }: TeamsTableProps) {
                 </TableCell>
                 <TableCell>{new Date(team.createdAt).toLocaleDateString()}</TableCell>
               </TableRow>
-            ))}
+            )))}
           </TableBody>
         </Table>
       </CardContent>

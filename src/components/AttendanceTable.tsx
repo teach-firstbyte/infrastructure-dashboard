@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Attendance } from "@/types/dashboard";
+import { TableEmptyState } from "./ui/TableEmptyState";
 
 interface AttendanceTableProps {
   attendance: Attendance[]
@@ -49,7 +50,10 @@ export function AttendanceTable({ attendance }: AttendanceTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {attendance.map((record) => (
+            {attendance.length === 0 ? (
+              <TableEmptyState colSpan={6} message="No attendance records yet."/>
+            ) : (
+            attendance.map((record) => (
               <TableRow key={record.id}>
                 <TableCell>
                   <div>
@@ -74,7 +78,7 @@ export function AttendanceTable({ attendance }: AttendanceTableProps) {
                 </TableCell>
                 <TableCell>{record.notes || 'N/A'}</TableCell>
               </TableRow>
-            ))}
+            )))}
           </TableBody>
         </Table>
       </CardContent>

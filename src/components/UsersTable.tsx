@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/modal"
 import { User } from "@/types/dashboard";
 import { useRouter } from "next/navigation"
+import { TableEmptyState } from "./ui/TableEmptyState"
 
 interface UsersTableProps {
   users: User[]
@@ -157,7 +158,10 @@ export function UsersTable({ users }: UsersTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users.length === 0 ? (
+              <TableEmptyState colSpan={5} message="No users yet."/>
+            ) : (
+            users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.id}</TableCell>
                 <TableCell>{user.name || 'N/A'}</TableCell>
@@ -173,7 +177,7 @@ export function UsersTable({ users }: UsersTableProps) {
                 </TableCell>
                 <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
               </TableRow>
-            ))}
+            )))}
           </TableBody>
         </Table>
         {showAddModal && (
