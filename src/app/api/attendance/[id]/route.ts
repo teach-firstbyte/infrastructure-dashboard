@@ -7,10 +7,11 @@ import { AttendanceStatus } from "@prisma/client";
  */
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const attendanceId = parseInt(params.id);
+        const { id } = await params;
+        const attendanceId = parseInt(id);
 
         if (isNaN(attendanceId)) {
             return NextResponse.json({ error: "Invalid attendance ID" }, { status: 400 });
@@ -36,10 +37,11 @@ export async function GET(
  */
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const attendanceId = parseInt(params.id);
+        const { id } = await params;
+        const attendanceId = parseInt(id);
 
         if (isNaN(attendanceId)) {
             return NextResponse.json({ error: "Invalid attendance ID" }, { status: 400 });
@@ -100,10 +102,11 @@ export async function PUT(
  */
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise< { id: string } >}
 ) {
     try {
-        const attendanceId = parseInt(params.id);
+        const { id } = await params;
+        const attendanceId = parseInt(id);
 
         if (isNaN(attendanceId)) {
             return NextResponse.json({ error: "Invalid attendance ID" }, { status: 400 });

@@ -6,9 +6,32 @@ import { AttendanceStatus } from "@prisma/client";
  * Gets all attendance records
  * @returns the attendance records
  */
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: Request): Promise<NextResponse> {
   try {
+    const { searchParams } = new URL(request.url);
+    const meetingIdParam = searchParams.get("meetingId");
+    const userIdParam = searchParams.get("userId");
+    
+    const where: { meetingId?: number; userId?: number } = {};
+
+    if (meetingIdParam != null) {
+      const meetingId = parseInt(meetingIdParam);
+      if (isNaN(meetingId)) {
+        return NextResponse.json({ error: "meetingId must be a valid integer" }, { status: 400 });
+      }
+      where.meetingId = meetingId;
+    }
+
+    if (userIdParam !== null) {
+      const userId = parseInt(userIdParam);
+      if (isNaN(userId)) {
+        return NextResponse.json({ error: "userId must be a valid integer"}, { status: 400 });
+      }
+      where.userId = userId;
+    }
+    
     const attendance = await prisma.attendance.findMany({
+      where,
       include: {
         user: true,
         meeting: true
