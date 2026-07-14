@@ -31,7 +31,7 @@ A dashboard for tracking FirstByte club participation, attendance, projects, and
 
 2. **Copy and update environment variables**
    - Create an `.env.local` file
-   - Ask Ameeka or Nick for the Supabase keys
+   - Ask Hector or Nick for the Supabase keys
    - Fill in the required values (Will have **two** files)
      ```.env
      DATABASE_URL="postgresql://postgres.[URL]:[PASSWORD]@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
@@ -40,6 +40,14 @@ A dashboard for tracking FirstByte club participation, attendance, projects, and
      NEXT_PUBLIC_SUPABASE_URL="https://[URL].supabase.co"
      NEXT_PUBLIC_SUPABASE_ANON_KEY="[ANON_KEY]"
      ```
+  - Generate a `CHECKIN_SECRET` for the attendance check-in codes:
+    ```bash
+    openssl rand -hex 32
+    ```
+     Add it to `.env.local`. **This is a server-only secret — do NOT prefix it with `NEXT_PUBLIC_`.** It signs the check-in codes; if it leaks to the browser, anyone could forge attendance codes.
+    ```.env.local
+     CHECKIN_SECRET="[GENERATED_SECRET]"
+    ```
 
 3. **Install dependencies**
    ```bash
@@ -105,6 +113,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `"Module not found" errors`  
   - Run `npm install` to ensure all dependencies are present
 
+- `"CHECKIN_SECRET is not set"`  
+  - The attendance check-in feature needs this variable in `.env.local`  
+  - Generate one with `openssl rand -hex 32`, then restart the dev server
+
 **If you’re stuck:**  
 - Check terminal output for error messages  
 - Verify your environment variables  
@@ -113,9 +125,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ---
 
 ## 🎯 Future Roadmap
-
-- User authentication & authorization  
-- Google SSO integration  
+ 
 - File upload capabilities  
 - Some form of Jira board integration for task management  
 - Admin dashboard for content management  
