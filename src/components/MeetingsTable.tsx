@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
-import React, { useState } from "react"
+import Link from "next/link"
+import React, { useEffect, useState } from "react"
 import {
   Modal,
   ModalHeader,
@@ -46,6 +47,7 @@ const MEETING_TYPES = [
 interface NewMeeting {
   title: string;
   type: string;
+  teamId: string;
   scheduledAt: string;
   description: string;
   location: string;
@@ -56,6 +58,7 @@ interface NewMeeting {
 const emptyMeeting: NewMeeting = {
   title: "",
   type: "",
+  teamId: "none",
   scheduledAt: "",
   description: "",
   location: "",
@@ -69,6 +72,23 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
   const [newMeeting, setNewMeeting] = useState<NewMeeting>(emptyMeeting);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [teams, setTeams] = useState<{ id: number; name: string }[]>([]);
+
+  useEffect(() => {
+    if (!showAddModal) return;
+    if (teams.length > 0) return;
+    async function loadTeams() {
+      try {
+        const res = await fetch(`/api/teams`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setTeams(data.map((t: { id: number; name: string }) => ({ id: t.id, name: t.name })));
+      } catch {
+
+      }  
+    }
+    loadTeams();
+  }, [showAddModal, teams.length]);
 
   const getStatusBadge = (meeting: Meeting) => {
     if (meeting.endedAt) return <Badge variant="secondary">Completed</Badge>
@@ -108,6 +128,7 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
         body: JSON.stringify({
           title: newMeeting.title,
           type: newMeeting.type,
+          teamId: newMeeting.teamId === "none"? null : Number(newMeeting.teamId),
           scheduledAt: new Date(newMeeting.scheduledAt).toISOString(),
           description: newMeeting.description || null,
           location: newMeeting.location || null,
@@ -154,11 +175,12 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
               <TableHead>Scheduled</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Attendance</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {meetings.length === 0 ? (
-              <TableEmptyState colSpan={7} message="No meetings scheduled yet." />
+              <TableEmptyState colSpan={8} message="No meetings scheduled yet." />
             ) : (
             meetings.map((meeting) => (
               <TableRow key={meeting.id}>
@@ -173,6 +195,17 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
                 <TableCell>
                   <div className="text-sm">
                     {meeting.attendance.filter(a => a.status === 'PRESENT').length} / {meeting.attendance.length}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-3">
+                    <Link href={`/meetings/${meeting.id}/attendance`} className="text-sm text-primary underline">
+                      Attendance
+                    </Link>
+                    <Link href={`/meetings/${meeting.id}/check-in-display`} className="text-sm text-primary underline">
+                      QR Code
+                    </Link>
+
                   </div>
                 </TableCell>
               </TableRow>
@@ -201,6 +234,15 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
                   value: t,
                   label: t.replace(/_/g, " "),
                 }))}
+              />
+              <ModalDropdown 
+                label="Team (optional)"
+                value={newMeeting.teamId}
+                onChange={(e) => setNewMeeting((prev) => ({ ...prev, teamId: e.target.value }))}
+                options={[
+                  { value: "none", label: "General - all members" },
+                  ...teams.map((t) => ({ value: String(t.id), label: t.name })),
+                ]}
               />
               <label className="block text-sm font-medium">Scheduled at</label>
               <input
