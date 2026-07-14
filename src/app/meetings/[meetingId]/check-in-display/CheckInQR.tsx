@@ -29,7 +29,7 @@ export function CheckInQR({ meetingTitle, code, path } : CheckInQRProps) {
                     <QRCodeSVG value={url} size={240} />
                 ) : (
                     <div className="h-[240px] w-[240px] animate-pulse rounded-md bg-muted" />
-                )};
+                )}
                 <div className="text-center">
                     <p className="text-sm text-muted-foreground">Or enter this code:</p>
                     <p className="text-3xl font-bold tracking-widest">{code}</p>
