@@ -106,6 +106,35 @@ export async function POST(request: Request): Promise<NextResponse> {
       },
     });
 
+    // Determine the expected roster for this meeting.
+    // Team meeting (teamId set) -> that team's members.
+    // General meeting (teamId null) -> all club members.
+    let expectedUserIds: number[];
+
+    if (meeting.teamId != null) {
+      const teamMembers = await prisma.teamMember.findMany({
+        where: { teamId: meeting.teamId },
+        select: { userId: true },
+      });
+      expectedUserIds = teamMembers.map((m) => m.userId);
+    } else {
+      const allUsers = await prisma.user.findMany({
+        select: { id: true },
+      });
+      expectedUserIds = allUsers.map((u) => u.id)
+    }
+
+    if (expectedUserIds.length > 0) {
+      await prisma.attendance.createMany({
+        data: expectedUserIds.map((userId) => ({
+          userId,
+          meetingId: meeting.id,
+          status: "REGISTERED" as const
+        })),
+        skipDuplicates: true,
+      })
+    }
+
     return NextResponse.json(meeting, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create meeting' }, { status: 500 });
