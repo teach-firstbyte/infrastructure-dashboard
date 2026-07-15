@@ -7,10 +7,11 @@ import { MeetingType } from "@prisma/client";
  */
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const meetingId = parseInt(params.id);
+        const { id } = await params;
+        const meetingId = parseInt(id);
 
         if (isNaN(meetingId)) {
             return NextResponse.json({ error: "Invalid meeting ID" }, { status: 400 });
@@ -40,10 +41,11 @@ export async function GET(
  */
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const meetingId = parseInt(params.id);
+        const { id } = await params;
+        const meetingId = parseInt(id);
 
         if (isNaN(meetingId)) {
             return NextResponse.json({ error: "Invalid meeting ID" }, { status: 400 });
@@ -155,11 +157,12 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         // get meeting ID
-        const meetingId = parseInt(params.id);
+        const meetingId = parseInt(id);
 
         // check that the ID is a number
         if (isNaN(meetingId)) {
