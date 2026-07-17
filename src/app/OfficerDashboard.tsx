@@ -89,7 +89,7 @@ export async function OfficerDashboard() {
             </div>
           )}
     
-          <div className="grid gap-6">
+          <div className="grid gap-6 [*&>*]:min-w-0">
             <UsersTable users={data.users} />
             <TeamsTable teams={data.teams} />
             <MeetingsTable meetings={data.meetings} />
