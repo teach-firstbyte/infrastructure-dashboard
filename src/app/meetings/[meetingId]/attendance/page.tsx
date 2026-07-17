@@ -1,20 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { AttendanceToggle } from "./AttendanceToggle";
+import { requireOfficer } from "@/lib/auth/requireOfficer";
 
 export default async function MeetingAttendancePage({
     params,
 }: {
     params: Promise<{ meetingId: string }>
 }) {
+    const officer = await requireOfficer();
     const { meetingId } = await params;
-
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        redirect("/login");
-    }
 
     const parsedMeetingId = parseInt(meetingId);
     if (isNaN(parsedMeetingId)) {

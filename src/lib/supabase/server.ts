@@ -17,7 +17,8 @@ export async function createClient() {
                             cookieStore.set({name, value, ...options});
                         });
                     } catch (error) {
-                        console.error("Error setting cookies:", error);
+                        // Runs during page render, where cookie writes aren't allowed.
+                        // Safe to ignore - middleware.ts already refreshed the session this request.
                     }
                 }
             },

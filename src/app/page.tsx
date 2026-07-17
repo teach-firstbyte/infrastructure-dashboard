@@ -9,101 +9,14 @@ import type { Attendance, Feedback, Meeting, Team, User } from "@/types/dashboar
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { logOut } from "./login/actions"
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { OfficerDashboard } from "./OfficerDashboard";
+import { isOfficer } from "@/lib/auth/roles";
+import { MemberDashboard } from "./MemberDashboard";
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect('/login');
-  }
+  const user = await getCurrentUser();
+  if(!user) redirect('/login');
 
-  const emptyData = {
-    users: [] as User[],
-    teams: [] as Team[],
-    meetings: [] as Meeting[],
-    attendance: [] as Attendance[],
-    feedback: [] as Feedback[],
-  };
-
-  let data = emptyData;
-  let dbUnavailable = false;
-
-  try {
-    // Fetch all data from Prisma. If this fails, render the dashboard with empty state data.
-    const [users, teams, meetings, attendance, feedback] = await Promise.all([
-      prisma.user.findMany({
-        include: {
-          teamMemberships: {
-            include: {
-              team: true,
-            },
-          },
-        },
-      }),
-      prisma.team.findMany({
-        include: {
-          members: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      }),
-      prisma.meeting.findMany({
-        include: {
-          attendance: {
-            include: {
-              user: true,
-            },
-          },
-          feedback: true,
-        },
-      }),
-      prisma.attendance.findMany({
-        include: {
-          user: true,
-          meeting: true,
-        },
-      }),
-      prisma.feedback.findMany({
-        include: {
-          meeting: true,
-          author: true,
-        },
-      }),
-    ]);
-
-    data = { users, teams, meetings, attendance, feedback };
-  } catch (error) {
-    dbUnavailable = true;
-    console.error("Database unavailable, rendering empty dashboard state:", error);
-  }
-
-  return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="text-center mb-8">
-        <Image src="/FirstByteBitex4.png" alt="FirstByte" width={200} height={200} className="mx-auto mb-4" />
-        <h1 className="text-3xl font-bold">FirstByte Dashboard</h1>
-        <p className="text-muted-foreground">Participation and engagement tracking</p>
-      </div>
-      <form>
-        <button formAction={logOut} className="text-sm px-3 py-1.5 rounded-md bg-[rgb(76,111,78)] text-white hover:opacity-90 transition">
-          Log out
-        </button>
-      </form>
-      {dbUnavailable && (
-        <div className="rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
-          Could not load database data right now. Showing an empty dashboard until the connection is restored.
-        </div>
-      )}
-
-      <div className="grid gap-6">
-        <UsersTable users={data.users} />
-        <TeamsTable teams={data.teams} />
-        <MeetingsTable meetings={data.meetings} />
-        <AttendanceTable attendance={data.attendance} />
-        <FeedbackTable feedback={data.feedback} />
-      </div>
-    </div>
-  );
+  return isOfficer(user) ? <OfficerDashboard /> : <MemberDashboard user={user} />;
 }
