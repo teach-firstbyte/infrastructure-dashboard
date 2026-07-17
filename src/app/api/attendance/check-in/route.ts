@@ -31,7 +31,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if(!verifyCheckInCode(parsedMeetingId, code)) {
         return NextResponse.json(
-            { error: "Invlaid check-in code" },
+            { error: "Invalid check-in code" },
             { status: 403 }
         );
     }

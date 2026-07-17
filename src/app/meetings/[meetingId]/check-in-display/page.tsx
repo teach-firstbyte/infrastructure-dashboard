@@ -1,21 +1,15 @@
 import { generateCheckInCode } from "@/lib/attendance/check-in-code";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { CheckInQR } from "./CheckInQR";
+import { requireOfficer } from "@/lib/auth/requireOfficer";
 
 export default async function CheckInDisplayPage({
     params,
 } : {
     params: Promise<{ meetingId: string }>;
 }) {
+    const officer = await requireOfficer();
     const { meetingId } = await params;
-
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        redirect("/login");
-    }
 
     const parsedMeetingId = parseInt(meetingId);
     if (isNaN(parsedMeetingId)) {
