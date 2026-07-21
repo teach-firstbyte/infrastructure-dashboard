@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Meeting, User } from "@prisma/client";
 import { logOut } from "./login/actions";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +6,7 @@ import { Card, CardButton, CardContent, CardDescription, CardFooter, CardHeader,
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { MeetingStatusBadge } from "@/components/MeetingStatusBadge";
 
 export async function MemberDashboard({ user }: { user: User }) {
     // Gets the users own memberships to display.
@@ -15,10 +16,11 @@ export async function MemberDashboard({ user }: { user: User }) {
     })
     const teamIds = memberships.map((m) => m.teamId);
 
+    const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
     // Gets the users own upcoming meeting of the teams they are apart of.
     const meetings = await prisma.meeting.findMany({
         where: {
-            scheduledAt: { gt: new Date() },
+            scheduledAt: { gt: new Date(Date.now() - TWO_HOURS_MS) },
             OR: [
                 { teamId: { in: teamIds } },
                 { teamId: null },
@@ -93,6 +95,7 @@ export async function MemberDashboard({ user }: { user: User }) {
                                     </p>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
+                                    <MeetingStatusBadge scheduledAt={meeting.scheduledAt}/>
                                     <Badge variant={meeting.team ? "outline" : "secondary"}>
                                         {meeting.team ? meeting.team.name : "General"}
                                     </Badge>

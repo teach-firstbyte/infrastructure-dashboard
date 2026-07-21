@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { TeamRole } from '@prisma/client';
+import { requireOfficer } from '@/lib/auth/requireOfficer';
+import { requireOfficerApi } from '@/lib/auth/requireOfficerApi';
 
 /**
  * Gets all team members, including their user and team.
@@ -8,6 +10,9 @@ import { TeamRole } from '@prisma/client';
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    const { error } = await requireOfficerApi();
+    if (error) return error;
+
     const teamMembers = await prisma.teamMember.findMany({
       include: {
         user: true,
@@ -28,6 +33,8 @@ export async function GET(): Promise<NextResponse> {
 export async function POST(request: Request): Promise<NextResponse> {
 
   try {
+    const { error } = await requireOfficerApi();
+    if (error) return error;
 
     // Validate the request body
     const { userId, teamId, role } = await request.json();
@@ -53,6 +60,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       }, { status: 400 });
     }
 
+    const existing = await prisma.teamMember.findUnique({
+      where: { userId_teamId: { userId: parsedUserId, teamId: parsedTeamId } }
+    })
+    if (existing) {
+      return NextResponse.json(
+        { error: "This user is already a member of this team" },
+        { status: 409 }
+      )
+    }
+    
     // Create the team member
     const teamMember = await prisma.teamMember.create({
       data: { 

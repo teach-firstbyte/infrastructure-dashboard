@@ -1,16 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { FeedbackCategory } from "@prisma/client";
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 
 /**
  * Gets a single feedback record by id.
  */
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const feedbackId = parseInt(params.id);
+        const { user, error } = await requireOfficerApi();
+        if (error) return error;
+        
+        const { id } = await params;
+        const feedbackId = parseInt(id);
 
         if (isNaN(feedbackId)) {
             return NextResponse.json({ error: "Invalid feedback ID" }, { status: 400 });
@@ -25,7 +31,11 @@ export async function GET(
             return NextResponse.json({ error: "Feedback not found" }, { status: 404 });
         }
 
-        return NextResponse.json(feedback, { status: 200 });
+        const cleaned = feedback.isAnonymous && feedback.authorId !== user.id
+            ? {...feedback, author: null, authorId: null }
+            : feedback;
+
+        return NextResponse.json(cleaned, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to get feedback" }, { status: 500 });
     }
@@ -36,10 +46,14 @@ export async function GET(
  */
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const feedbackId = parseInt(params.id);
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
+        const { id } = await params;
+        const feedbackId = parseInt(id);
 
         if (isNaN(feedbackId)) {
             return NextResponse.json({ error: "Invalid feedback ID" }, { status: 400 });
@@ -114,10 +128,14 @@ export async function PUT(
  */
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const feedbackId = parseInt(params.id);
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
+        const { id } = await params;
+        const feedbackId = parseInt(id);
 
         if (isNaN(feedbackId)) {
             return NextResponse.json({ error: "Invalid feedback ID" }, { status: 400 });

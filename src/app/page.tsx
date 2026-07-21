@@ -18,5 +18,5 @@ export default async function Home() {
   const user = await getCurrentUser();
   if(!user) redirect('/login');
 
-  return isOfficer(user) ? <OfficerDashboard /> : <MemberDashboard user={user} />;
+  return isOfficer(user) ? <OfficerDashboard /> : <MemberDashboard user={user}/>;
 }

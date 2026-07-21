@@ -1,3 +1,6 @@
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
+import { requireUserApi } from "@/lib/auth/requireUserApi";
+import { isOfficer } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -9,15 +12,20 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
-        const userId = parseInt(id);
+        const { user, error } = await requireUserApi();
+        if (error) return error;
 
-        if (isNaN(userId)) {
+        const { id } = await params;
+        const pathId = parseInt(id);
+
+        if (isNaN(pathId)) {
             return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
+        const targetId = isOfficer(user) ? pathId : user.id;
+
+        const found = await prisma.user.findUnique({
+            where: { id: targetId },
             include: {
                 teamMemberships: {
                     include: { team: true },
@@ -25,11 +33,11 @@ export async function GET(
             },
         });
 
-        if (!user) {
+        if (!found) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json(user, { status: 200 });
+        return NextResponse.json(found, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to get user" }, { status: 500 });
     }
@@ -43,12 +51,17 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
-        const userId = parseInt(id);
+        const { user, error } = await requireUserApi();
+        if (error) return error;
 
-        if (isNaN(userId)) {
+        const { id } = await params;
+        const pathId = parseInt(id);
+
+        if (isNaN(pathId)) {
             return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
         }
+
+        const targetId = isOfficer(user) ? pathId : user.id;
 
         const { name, email } = await request.json();
 
@@ -59,7 +72,7 @@ export async function PUT(
             );
         }
 
-        const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+        const existingUser = await prisma.user.findUnique({ where: { id: targetId } });
         if (!existingUser) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
@@ -76,7 +89,7 @@ export async function PUT(
         }
 
         const updatedUser = await prisma.user.update({
-            where: { id: userId },
+            where: { id: targetId },
             data: {
                 ...(name !== undefined ? { name } : {}),
                 ...(email !== undefined ? { email } : {}),
@@ -95,6 +108,8 @@ export async function DELETE(
 ) {
 
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
         // get user ID
         const { id } = await params;
         const userId = parseInt(id);

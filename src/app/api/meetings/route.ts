@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { MeetingType } from "@prisma/client";
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
+import { requireUserApi } from "@/lib/auth/requireUserApi";
+import { isOfficer } from "@/lib/auth/roles";
 
 /**
  * Gets all meetings
@@ -8,16 +11,43 @@ import { MeetingType } from "@prisma/client";
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    const { user, error } = await requireUserApi();
+    if (error) return error;
+
+    if(isOfficer(user)) {
+      const meetings = await prisma.meeting.findMany({
+        include: {
+          attendance: {
+              include: {
+                  user: true
+              }
+          },
+          feedback: true
+        }
+      });
+      return NextResponse.json(meetings, { status: 200 });
+    }
+    
+    const memberships = await prisma.teamMember.findMany({
+      where: { userId: user.id },
+      select: { teamId: true },
+    })
+
+    const teamIds = memberships.map((m) => m.teamId);
+
+    // grace window: keep in-progess meetings visible ˜2 hrs past start
+    const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+
     const meetings = await prisma.meeting.findMany({
-      include: {
-        attendance: {
-            include: {
-                user: true
-            }
-        },
-        feedback: true
+      where: {
+        scheduledAt: { gt: new Date(Date.now() - TWO_HOURS_MS) },
+        OR: [
+          { teamId: null },
+          { teamId: { in: teamIds } }
+        ]
       }
-    });
+    })
+
     return NextResponse.json(meetings, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to get meetings' }, { status: 500 });
@@ -31,6 +61,9 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
+    const { error } = await requireOfficerApi();
+    if (error) return error;
+    
     // Validate the request body
     const {
       title,

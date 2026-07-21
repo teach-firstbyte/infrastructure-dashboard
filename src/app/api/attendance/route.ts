@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { AttendanceStatus } from "@prisma/client";
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
+import { requireUserApi } from "@/lib/auth/requireUserApi";
+import { isOfficer } from "@/lib/auth/roles";
 
 /**
  * Gets all attendance records
@@ -8,6 +11,10 @@ import { AttendanceStatus } from "@prisma/client";
  */
 export async function GET(request: Request): Promise<NextResponse> {
   try {
+    const { user, error } = await requireUserApi();
+    if (error) return error;
+    const officer = isOfficer(user);
+
     const { searchParams } = new URL(request.url);
     const meetingIdParam = searchParams.get("meetingId");
     const userIdParam = searchParams.get("userId");
@@ -22,12 +29,17 @@ export async function GET(request: Request): Promise<NextResponse> {
       where.meetingId = meetingId;
     }
 
-    if (userIdParam !== null) {
-      const userId = parseInt(userIdParam);
-      if (isNaN(userId)) {
-        return NextResponse.json({ error: "userId must be a valid integer"}, { status: 400 });
+    if (officer) {
+      // Honor the caller's ?userId= exactly as before.
+      if (userIdParam !== null) {
+        const userId = parseInt(userIdParam);
+        if (isNaN(userId)) {
+          return NextResponse.json({ error: "userId must be a valid integer"}, { status: 400 });
+        }
+        where.userId = userId;
       }
-      where.userId = userId;
+    } else {
+      where.userId = user.id; // overwrites original call in case a user is trying to access another user information.
     }
     
     const attendance = await prisma.attendance.findMany({
@@ -50,6 +62,9 @@ export async function GET(request: Request): Promise<NextResponse> {
  */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
+    const { error } = await requireOfficerApi();
+    if (error) return error;
+
     const { userId, meetingId, status, checkedInAt, checkedOutAt, notes } =
       await request.json();
 
