@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { CheckInForm } from "./CheckInForm";
+import { BackLink } from "@/components/BackLink";
 
 export default async function CheckInPage({
   params,
@@ -34,7 +35,8 @@ export default async function CheckInPage({
 
   // Hand off to the Client Component for the interactive part
   return (
-    <div className="container mx-auto max-w-md p-6">
+    <div className="container mx-auto max-w-md p-6 space-y-6">
+      <BackLink />
       <CheckInForm
         meetingId={parsedMeetingId}
         meetingTitle={meeting.title}

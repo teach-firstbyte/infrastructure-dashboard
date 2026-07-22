@@ -112,7 +112,13 @@ export async function MemberDashboard({ user }: { user: User }) {
             {/* Logout */}
             <CardFooter className="px-0">
                 <form>
-                    <CardButton formAction={logOut}>Log out</CardButton>
+                    <SubmitButton 
+                    formAction={logOut} 
+                    className="text-sm px-3 py-1.5 rounded-md bg-[rgb(76,111,78)] text-white hover:opacity-90 transition"
+                    pendingLabel="Logging Out..."
+                    >
+                        Log out
+                    </SubmitButton>
                 </form>
             </CardFooter>
             

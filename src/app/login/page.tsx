@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { signUp, logIn } from "./actions"
 import { GoogleButton } from "./GoogleButton"
+import { SubmitButton } from "@/components/SubmitButton"
 
 export default async function LoginPage({
   searchParams,
@@ -36,7 +37,7 @@ export default async function LoginPage({
         <CardHeader>
           <CardTitle>Log In</CardTitle>
           <CardDescription>
-            Use your email, or sign up if you&apos;re new.
+            Use your email, or sign up if you're new.
           </CardDescription>
         </CardHeader>
         
@@ -61,12 +62,12 @@ export default async function LoginPage({
             <Input name="name" type="text" placeholder="Full name (signup only)" />
 
             <div className="flex gap-2 pt-2">
-              <Button formAction={logIn} className="flex-1">
-                Log In
-              </Button>
-              <Button formAction={signUp} variant="secondary" className="flex-1">
+              <SubmitButton formAction={logIn} className="flex-1">
+                Log in
+              </SubmitButton>
+              <SubmitButton formAction={signUp} variant="secondary" className="flex-1">
                 Sign Up
-              </Button>
+              </SubmitButton>
             </div>
           </form>
         </CardContent>

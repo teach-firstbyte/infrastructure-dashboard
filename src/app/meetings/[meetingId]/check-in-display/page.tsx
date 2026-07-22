@@ -2,6 +2,7 @@ import { generateCheckInCode } from "@/lib/attendance/check-in-code";
 import { prisma } from "@/lib/prisma";
 import { CheckInQR } from "./CheckInQR";
 import { requireOfficer } from "@/lib/auth/requireOfficer";
+import { BackLink } from "@/components/BackLink";
 
 export default async function CheckInDisplayPage({
     params,
@@ -26,7 +27,8 @@ export default async function CheckInDisplayPage({
     const path = `/check-in/${parsedMeetingId}?code=${code}`;
 
     return (
-        <div className="container mx-auto max-w-md p-6">
+        <div className="container mx-auto max-w-md p-6 space-y-6">
+            <BackLink />
             <CheckInQR meetingTitle={meeting.title} code={code} path={path} />
         </div>
     );

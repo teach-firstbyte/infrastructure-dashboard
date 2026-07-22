@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { AttendanceToggle } from "./AttendanceToggle";
 import { requireOfficer } from "@/lib/auth/requireOfficer";
+import { BackLink } from "@/components/BackLink";
 
 export default async function MeetingAttendancePage({
     params,
@@ -21,7 +22,8 @@ export default async function MeetingAttendancePage({
     }
 
     return (
-        <div className="container mx-auto max-w-2xl p-6">
+        <div className="container mx-auto max-w-2xl p-6 space-y-6">
+            <BackLink />
             <AttendanceToggle meetingId={parsedMeetingId} meetingTitle={meeting.title} />
         </div>
     )
