@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { TeamRole } from "@prisma/client";
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
 
 /**
  * Gets a single team member by id, including their user and team.
@@ -10,6 +11,9 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+        
         const { id } = await params;
         const teamMemberId = parseInt(id);
 
@@ -49,6 +53,9 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         const teamMemberId = parseInt(id);
 
@@ -103,6 +110,9 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+        
         const { id } = await params;
         const teamMemberId = parseInt(id);
 

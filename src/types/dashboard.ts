@@ -77,7 +77,7 @@ export interface Attendance {
 export interface Feedback {
   id: number;
   meetingId: number;
-  authorId: number;
+  authorId: number | null;
   rating: number | null;
   comment: string | null;
   category: string | null;
@@ -89,6 +89,6 @@ export interface Feedback {
   };
   author: {
     name: string | null;
-    email: string;
+    email: string | null;
   };
 }

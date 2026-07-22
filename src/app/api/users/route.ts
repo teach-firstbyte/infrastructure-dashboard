@@ -1,3 +1,4 @@
+import { requireOfficerApi } from '@/lib/auth/requireOfficerApi';
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -7,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    const { error } = await requireOfficerApi();
+    if (error) return error;
+    
     const users = await prisma.user.findMany({
       include: { 
         teamMemberships: {
@@ -30,6 +34,8 @@ export async function GET(): Promise<NextResponse> {
 export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
+    const { error } = await requireOfficerApi();
+    if (error) return error;
 
     // Validate the request body
     const { email, name } = await request.json();

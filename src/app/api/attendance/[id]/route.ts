@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { AttendanceStatus } from "@prisma/client";
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
 
 /**
  * Gets a single attendance record by id.
@@ -10,6 +11,9 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         const attendanceId = parseInt(id);
 
@@ -40,6 +44,9 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         const attendanceId = parseInt(id);
 
@@ -105,6 +112,9 @@ export async function DELETE(
     { params }: { params: Promise< { id: string } >}
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         const attendanceId = parseInt(id);
 

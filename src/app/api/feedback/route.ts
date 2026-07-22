@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { FeedbackCategory } from "@prisma/client";
+import { requireUserApi } from "@/lib/auth/requireUserApi";
+import { isOfficer } from "@/lib/auth/roles";
 
 /**
  * Gets all feedback records
@@ -8,13 +10,24 @@ import { FeedbackCategory } from "@prisma/client";
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    const { user, error } = await requireUserApi();
+    if (error) return error;
+
+    const where = isOfficer(user) ? {} : { authorId: user.id };
+
     const feedback = await prisma.feedback.findMany({
+      where,
       include: {
         meeting: true,
         author: true
       }
     });
-    return NextResponse.json(feedback, { status: 200 });
+    
+    const cleaned = feedback.map((f) =>
+      f.isAnonymous && f.authorId !== user.id ? { ...f, author: null, authorId: null } : f
+    );
+
+    return NextResponse.json(cleaned, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to get feedback' }, { status: 500 });
   }
@@ -27,22 +40,24 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const { meetingId, authorId, rating, comment, category, isAnonymous } =
-      await request.json();
+    const { user, error } = await requireUserApi();
+    if (error) return error;
+    
+    const { meetingId, rating, comment, category, isAnonymous } =
+      await request.json(); // no authorId pulled yet
 
-    // meetingId and authorId are required
-    if (!meetingId || !authorId) {
+    // meetingId is required
+    if (!meetingId) {
       return NextResponse.json(
-        { error: 'meetingId and authorId are required' },
+        { error: 'meetingId is required' },
         { status: 400 }
       );
     }
 
     const parsedMeetingId = parseInt(meetingId);
-    const parsedAuthorId = parseInt(authorId);
-    if (isNaN(parsedMeetingId) || isNaN(parsedAuthorId)) {
+    if (isNaN(parsedMeetingId)) {
       return NextResponse.json(
-        { error: 'meetingId and authorId must be valid integers' },
+        { error: 'meetingId must be a valid integer' },
         { status: 400 }
       );
     }
@@ -73,7 +88,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const feedback = await prisma.feedback.create({
       data: {
         meetingId: parsedMeetingId,
-        authorId: parsedAuthorId,
+        authorId: user.id, // from trusted session NEVER body
         rating: parsedRating,
         comment: comment ?? null,
         category: (category as FeedbackCategory) ?? null,

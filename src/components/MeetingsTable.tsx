@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/modal"
 import { Meeting } from "@/types/dashboard";
 import { TableEmptyState } from "./ui/TableEmptyState"
+import { MeetingStatusBadge } from "./MeetingStatusBadge"
 
 interface MeetingsTableProps {
   meetings: Meeting[]
@@ -89,12 +90,6 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
     }
     loadTeams();
   }, [showAddModal, teams.length]);
-
-  const getStatusBadge = (meeting: Meeting) => {
-    if (meeting.endedAt) return <Badge variant="secondary">Completed</Badge>
-    if (meeting.startedAt) return <Badge variant="default">In Progress</Badge>
-    return <Badge variant="outline">Scheduled</Badge>
-  }
 
   const closeModal = () => {
     setShowAddModal(false);
@@ -191,7 +186,9 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
                 </TableCell>
                 <TableCell>{meeting.team?.name || 'N/A'}</TableCell>
                 <TableCell>{new Date(meeting.scheduledAt).toLocaleString()}</TableCell>
-                <TableCell>{getStatusBadge(meeting)}</TableCell>
+                <TableCell>
+                  <MeetingStatusBadge scheduledAt={meeting.scheduledAt} />
+                </TableCell>
                 <TableCell>
                   <div className="text-sm">
                     {meeting.attendance.filter(a => a.status === 'PRESENT').length} / {meeting.attendance.length}

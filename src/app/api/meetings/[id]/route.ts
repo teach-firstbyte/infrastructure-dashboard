@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { MeetingType } from "@prisma/client";
+import { requireOfficerApi } from "@/lib/auth/requireOfficerApi";
 
 /**
  * Gets a single meeting by id, including attendance and feedback.
@@ -10,9 +11,12 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         const meetingId = parseInt(id);
-
+        
         if (isNaN(meetingId)) {
             return NextResponse.json({ error: "Invalid meeting ID" }, { status: 400 });
         }
@@ -44,6 +48,9 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         const meetingId = parseInt(id);
 
@@ -160,6 +167,9 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { error } = await requireOfficerApi();
+        if (error) return error;
+
         const { id } = await params;
         // get meeting ID
         const meetingId = parseInt(id);
