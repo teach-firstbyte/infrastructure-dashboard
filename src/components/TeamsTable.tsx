@@ -28,12 +28,12 @@ export function TeamsTable({ teams }: TeamsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
+              <TableHead className="hidden md:table-cell">ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Members</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead className="hidden md:table-cell">Created</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -42,7 +42,7 @@ export function TeamsTable({ teams }: TeamsTableProps) {
             ) : (
             teams.map((team) => (
               <TableRow key={team.id}>
-                <TableCell className="font-medium">{team.id}</TableCell>
+                <TableCell className="font-medium hidden md:table-cell">{team.id}</TableCell>
                 <TableCell>{team.name}</TableCell>
                 <TableCell>{team.description || 'N/A'}</TableCell>
                 <TableCell>
@@ -59,7 +59,7 @@ export function TeamsTable({ teams }: TeamsTableProps) {
                     ))}
                   </div>
                 </TableCell>
-                <TableCell>{new Date(team.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell className="hidden md:table-cell">{new Date(team.createdAt).toLocaleDateString()}</TableCell>
               </TableRow>
             )))}
           </TableBody>

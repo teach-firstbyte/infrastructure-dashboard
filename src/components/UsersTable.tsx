@@ -136,8 +136,8 @@ export function UsersTable({ users }: UsersTableProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <div>
+      <CardHeader className="flex flex-col gap-4 md:grid md:gap-1.5 space-y-2">
+        <div className="space-y-2">
           <CardTitle>Users</CardTitle>
           <CardDescription>All registered users in the system</CardDescription>
         </div>
@@ -150,11 +150,11 @@ export function UsersTable({ users }: UsersTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
+              <TableHead className="hidden md:table-cell">ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teams</TableHead>
-              <TableHead>Joined</TableHead>
+              <TableHead className="hidden md:table-cell">Joined</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -163,7 +163,7 @@ export function UsersTable({ users }: UsersTableProps) {
             ) : (
             users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.id}</TableCell>
+                <TableCell className="font-medium hidden md:table-cell">{user.id}</TableCell>
                 <TableCell>{user.name || 'N/A'}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
@@ -175,7 +175,7 @@ export function UsersTable({ users }: UsersTableProps) {
                     ))}
                   </div>
                 </TableCell>
-                <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell className="hidden md:table-cell">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
               </TableRow>
             )))}
           </TableBody>

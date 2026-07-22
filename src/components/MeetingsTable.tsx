@@ -168,7 +168,7 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
+              <TableHead className="hidden md:table-cell">ID</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Team</TableHead>
@@ -184,7 +184,7 @@ export function MeetingsTable({ meetings }: MeetingsTableProps) {
             ) : (
             meetings.map((meeting) => (
               <TableRow key={meeting.id}>
-                <TableCell className="font-medium">{meeting.id}</TableCell>
+                <TableCell className="font-medium hidden md:table-cell">{meeting.id}</TableCell>
                 <TableCell>{meeting.title}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{meeting.type.replace(/_/g, ' ')}</Badge>
