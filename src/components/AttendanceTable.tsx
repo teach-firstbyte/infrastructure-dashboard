@@ -15,9 +15,10 @@ import { TableEmptyState } from "./ui/TableEmptyState";
 
 interface AttendanceTableProps {
   attendance: Attendance[]
+  emptyMessage?: string
 }
 
-export function AttendanceTable({ attendance }: AttendanceTableProps) {
+export function AttendanceTable({ attendance, emptyMessage = "No attendance records yet." }: AttendanceTableProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PRESENT':
@@ -51,7 +52,7 @@ export function AttendanceTable({ attendance }: AttendanceTableProps) {
           </TableHeader>
           <TableBody>
             {attendance.length === 0 ? (
-              <TableEmptyState colSpan={6} message="No attendance records yet."/>
+              <TableEmptyState colSpan={6} message={emptyMessage}/>
             ) : (
             attendance.map((record) => (
               <TableRow key={record.id}>
