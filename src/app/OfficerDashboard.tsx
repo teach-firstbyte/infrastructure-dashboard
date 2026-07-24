@@ -2,19 +2,25 @@ import Image from "next/image";
 import { UsersTable } from "@/components/UsersTable";
 import { TeamsTable } from "@/components/TeamsTable";
 import { MeetingsTable } from "@/components/MeetingsTable";
-import { AttendanceTable } from "@/components/AttendanceTable";
 import { FeedbackTable } from "@/components/FeedbackTable";
 import { prisma } from "@/lib/prisma";
-import type { Attendance, Feedback, Meeting, Team, User } from "@/types/dashboard";
+import type { Feedback, Meeting, Team, User } from "@/types/dashboard";
 import { logOut } from "./login/actions"
 import { SubmitButton } from "@/components/SubmitButton";
+import { AttendanceStatus } from "@prisma/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export async function OfficerDashboard() {
     const emptyData = {
         users: [] as User[],
         teams: [] as Team[],
         meetings: [] as Meeting[],
-        attendance: [] as Attendance[],
+        attendance: {
+            rate: null as number | null,
+            present: 0,
+            absent: 0,
+        },
         feedback: [] as Feedback[],
       };
     
@@ -23,7 +29,7 @@ export async function OfficerDashboard() {
     
       try {
         // Fetch all data from Prisma. If this fails, render the dashboard with empty state data.
-        const [users, teams, meetings, attendance, feedback] = await Promise.all([
+        const [users, teams, meetings, attendanceGrouped, feedback] = await Promise.all([
           prisma.user.findMany({
             include: {
               teamMemberships: {
@@ -52,11 +58,9 @@ export async function OfficerDashboard() {
               feedback: true,
             },
           }),
-          prisma.attendance.findMany({
-            include: {
-              user: true,
-              meeting: true,
-            },
+          prisma.attendance.groupBy({
+            by: ['status'],
+            _count: { _all: true }
           }),
           prisma.feedback.findMany({
             include: {
@@ -65,8 +69,29 @@ export async function OfficerDashboard() {
             },
           }),
         ]);
-    
-        data = { users, teams, meetings, attendance, feedback };
+
+        const counts: Record<AttendanceStatus, number> = {
+            REGISTERED: 0,
+            PRESENT: 0,
+            ABSENT: 0
+          };
+
+        for (const row of attendanceGrouped) {
+            counts[row.status] = row._count._all;
+        }
+        const decided = counts.PRESENT + counts.ABSENT;
+        const rate = decided > 0 ? counts.PRESENT / decided : null;
+
+        data = { 
+            users, 
+            teams, 
+            meetings, 
+            attendance: {
+                rate: rate,
+                present: counts.PRESENT,
+                absent: counts.ABSENT
+            },
+            feedback };
       } catch (error) {
         dbUnavailable = true;
         console.error("Database unavailable, rendering empty dashboard state:", error);
@@ -98,7 +123,27 @@ export async function OfficerDashboard() {
             <UsersTable users={data.users} />
             <TeamsTable teams={data.teams} />
             <MeetingsTable meetings={data.meetings} />
-            <AttendanceTable attendance={data.attendance} />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Attendance Rate</CardTitle>
+                    <CardDescription>Present out of all decided (present + absent)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-3xl font-bold">
+                        {data.attendance.rate !== null
+                            ? `${Math.round(data.attendance.rate * 100)}%`
+                            : "-" }
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        {data.attendance.rate !== null
+                            ? `${data.attendance.present} Present · ${data.attendance.absent} Absent`
+                            : "-" }
+                    </p>
+                    <Link href="/attendance" className="text-sm text-primary hover:underline mt-3 inline-block">
+                        View all records 
+                    </Link>
+                </CardContent>
+            </Card>
             <FeedbackTable feedback={data.feedback} />
           </div>
         </div>

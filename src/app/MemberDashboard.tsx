@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MeetingStatusBadge } from "@/components/MeetingStatusBadge";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function MemberDashboard({ user }: { user: User }) {
     // Gets the users own memberships to display.
