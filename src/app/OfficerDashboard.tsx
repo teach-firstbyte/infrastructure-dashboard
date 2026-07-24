@@ -10,6 +10,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { AttendanceStatus } from "@prisma/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export async function OfficerDashboard() {
     const emptyData = {
@@ -104,15 +105,20 @@ export async function OfficerDashboard() {
             <h1 className="text-3xl font-bold">FirstByte Dashboard</h1>
             <p className="text-muted-foreground">Participation and engagement tracking</p>
           </div>
-          <form>
-            <SubmitButton 
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" className="text-sm px-3 py-1.5 rounded-md">
+                <Link href="/settings">Settings</Link>
+            </Button>
+            <form>
+                <SubmitButton 
                 formAction={logOut} 
                 className="text-sm px-3 py-1.5 rounded-md bg-[rgb(76,111,78)] text-white hover:opacity-90 transition"
                 pendingLabel="Logging Out..."
                 >
-                Log out
-            </SubmitButton>
-          </form>
+                    Log out
+                </SubmitButton>
+            </form>
+          </div>
           {dbUnavailable && (
             <div className="rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
               Could not load database data right now. Showing an empty dashboard until the connection is restored.
