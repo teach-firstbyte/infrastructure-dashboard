@@ -28,7 +28,6 @@ export function TeamsTable({ teams }: TeamsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="hidden md:table-cell">ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
@@ -38,11 +37,10 @@ export function TeamsTable({ teams }: TeamsTableProps) {
           </TableHeader>
           <TableBody>
             {teams.length === 0 ? (
-              <TableEmptyState colSpan={6} message="No teams established yet." />
+              <TableEmptyState colSpan={5} message="No teams established yet." />
             ) : (
             teams.map((team) => (
               <TableRow key={team.id}>
-                <TableCell className="font-medium hidden md:table-cell">{team.id}</TableCell>
                 <TableCell>{team.name}</TableCell>
                 <TableCell>{team.description || 'N/A'}</TableCell>
                 <TableCell>

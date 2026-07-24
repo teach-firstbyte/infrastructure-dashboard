@@ -150,7 +150,6 @@ export function UsersTable({ users }: UsersTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="hidden md:table-cell">ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teams</TableHead>
@@ -159,13 +158,19 @@ export function UsersTable({ users }: UsersTableProps) {
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
-              <TableEmptyState colSpan={5} message="No users yet."/>
+              <TableEmptyState colSpan={4} message="No users yet."/>
             ) : (
             users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-medium hidden md:table-cell">{user.id}</TableCell>
                 <TableCell>{user.name || 'N/A'}</TableCell>
-                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <a
+                    href={`mailto:${user.email}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {user.email}
+                  </a>
+                </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     {user.teamMemberships.map((membership, index) => (
